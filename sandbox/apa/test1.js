@@ -2,7 +2,7 @@ points_state =
 {
     "point_num": 1000,
     "max_speed": 2,
-    "max_size": 10,
+    "max_size": 8,
     "points": [],
     "width": 0,
     "height": 0
@@ -18,7 +18,8 @@ function initPoints()
             , "y": Math.random() * points_state.height
             , "vx": (2*Math.random()-1) * points_state.max_speed
             , "vy": (2*Math.random()-1) * points_state.max_speed
-            , "size": Math.random() * points_state.max_size});
+            , "size": Math.random() * points_state.max_size
+            , "color": "#"+((1<<24)*Math.random()|0).toString(16) });
 
     }
 }
@@ -41,7 +42,10 @@ function onDraw()
 
     // draw points
     for( i=0; i<points_state.points.length; ++i)
+    {
+        ctx.fillStyle = points_state.points[i].color;
         ctx.fillRect(points_state.points[i].x, points_state.points[i].y, points_state.points[i].size, points_state.points[i].size);
+    }
 
     // move points
     movePoints();
