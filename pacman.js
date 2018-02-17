@@ -13,7 +13,7 @@ playground =
 		"------_-----_--_-----_------",
 		"------_--__________--_------",
 		"------_--_--------_--_------",
-		"__________--------__________",
+		"-_________--------_________-",
 		"------_--_--------_--_------",
 		"------_--__________--_------",
 		"------_--_--------_--_------",
@@ -36,8 +36,6 @@ function onLoad()
 function onDraw()
 {
 	var ctx = document.getElementById('canvas').getContext('2d')
-	ctx.canvas.width  = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	
 	cell_width = Math.round(ctx.canvas.width / playground.map[0].length);
