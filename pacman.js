@@ -19,7 +19,7 @@ playground =
 		"XXXXXX.XX.XXXXXXXX.XX.XXXXXX",
 		"X............XX............X",
 		"X.XXXX.XXXXX.XX.XXXXX.XXXX.X",
-		"X...XX................XX...X",
+		"X...XX.......O........XX...X",
 		"XXX.XX.XX.XXXXXXXX.XX.XX.XXX",
 		"X......XX....XX....XX......X",
 		"X.XXXXXXXXXX.XX.XXXXXXXXXX.X",
@@ -30,7 +30,7 @@ playground =
 
 function onLoad()
 {
-	window.setInterval(onDraw, 50);
+	window.setInterval(onDraw, 20);
 }
 
 function onDraw()
@@ -54,6 +54,29 @@ function onDraw()
 				ctx.fillStyle = "#111111"
 				ctx.fillRect(l*cell_width + 2*cell_width/5 , i*cell_height + 2*cell_height/5, (cell_width)/5, (cell_height)/5);
 			}
+			else if(playground.map[i][l] == 'O') // pacman
+			{
+				ctx.fillStyle = "#ffff00"
+				ctx.fillRect(l*cell_width, i*cell_height, cell_width, cell_height);
+			}
+		}
+	}
+	update();
+}
+
+function update()
+{
+	document.onkeydown = function(event) {
+		var key_press = String.fromCharCode(event.keyCode);
+		var key_code = event.keyCode;
+		if(key_press == "W"){
+			console.log("w");
+		} else if(key_press == "S") {
+			console.log("s");
+		} else if(key_press == "A") {
+			console.log("a");
+		} else if(key_press == "D") {
+			console.log("d");
 		}
 	}
 }
