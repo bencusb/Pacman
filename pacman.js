@@ -113,10 +113,8 @@ function updatePacman()
 		gamestate.map[row] = gamestate.map[row].substr(0,col) + ' ' + gamestate.map[row].substr(col+1);	
 	}
 	
-	// TODO: calculate new mouth_pos
-	// vagy novelni vagy csokkenti, ha elerte min/max-ot iranyt valtani
 	if(gamestate.pacman.opendir == "opening" && gamestate.pacman.mouth_pos < gameconfig.openmax)gamestate.pacman.mouth_pos += 0.03;
-	else if(gamestate.pacman.mouth_pos > 0.01)
+	else if(gamestate.pacman.mouth_pos > 0.03)
 	{	
 		gamestate.pacman.mouth_pos -= 0.03;
 		gamestate.pacman.opendir = "closing";
