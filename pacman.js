@@ -27,7 +27,13 @@ gamestate =
 		"XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     ],
 	"keys": {"W_pressed": false, "S_pressed":false,"A_pressed":false,"D_pressed":false},
-	"pacman": {"x": 13, "y": 17, "dir": "stop"}
+	"pacman": {"x": 13, "y": 17, "dir": "stop" , "opendir" : "opening", "mouth_pos" : 0.01}
+};
+
+gameconfig = 
+{
+	"mouth_angle": {"up": Math.PI + Math.PI / 2, "left": Math.PI, "down": Math.PI / 2, "right" : 0 },
+	"openmax" : 0.5
 };
 
 function onLoad()
@@ -35,7 +41,7 @@ function onLoad()
 	window.setInterval(onTick, 15);
 	document.onkeydown = onKeyDown;
 	document.onkeyup = onKeyUp;
-	score = 0;
+	score = 0;	
 }
 
 function onKeyDown(event) 
@@ -59,16 +65,10 @@ function onKeyUp(event)
 }
 
 function onTick()
-{
+{	
 	updatePacman();
 	updateGhosts();
-	draw();
-	if(score == 248)
-	{
-		ctx.font = "30px Arial";
-		ctx.fillText("Victory",10,50);
-	}
-	
+	draw();	
 	//console.log( gamestate.keys );
 }
 
@@ -112,6 +112,16 @@ function updatePacman()
 		console.log(score);
 		gamestate.map[row] = gamestate.map[row].substr(0,col) + ' ' + gamestate.map[row].substr(col+1);	
 	}
+	
+	// TODO: calculate new mouth_pos
+	// vagy novelni vagy csokkenti, ha elerte min/max-ot iranyt valtani
+	if(gamestate.pacman.opendir == "opening" && gamestate.pacman.mouth_pos < gameconfig.openmax)gamestate.pacman.mouth_pos += 0.03;
+	else if(gamestate.pacman.mouth_pos > 0.01)
+	{	
+		gamestate.pacman.mouth_pos -= 0.03;
+		gamestate.pacman.opendir = "closing";
+	}
+	else gamestate.pacman.opendir = "opening";
 }
 
 function updateGhosts()
@@ -123,16 +133,21 @@ function draw()
 	// clear canvas
 	var ctx = document.getElementById('canvas').getContext('2d')	
 	var cell_width = Math.round(ctx.canvas.width / gamestate.map[0].length);
-	var cell_height = Math.round(ctx.canvas.height / gamestate.map.length);
+	var cell_height = Math.round(ctx.canvas.height / gamestate.map.length);	
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	
     // draw map	
-	drawMap(ctx, cell_width, cell_height)
+	drawMap(ctx, cell_width, cell_height);
 	
 	// draw pacman
-	drawPacman(ctx, cell_width, cell_height)
-	
+	drawPacman(ctx, cell_width, cell_height);
+			
 	// draw ghosts
+	if(score == 248)
+	{
+		ctx.font = "90px Arial";
+		ctx.fillText("Victory",10,50);
+	}
 }
 
 function drawMap(ctx, cell_width, cell_height)
@@ -157,24 +172,28 @@ function drawMap(ctx, cell_width, cell_height)
 
 function drawPacman(ctx, cell_width, cell_height)
 {
-	ctx.beginPath();
-	ctx.arc(gamestate.pacman.x*cell_width + cell_width / 2, gamestate.pacman.y*cell_height  + cell_height / 2, cell_width / 3, 0, Math.PI*2 ,false);
-	ctx.fillStyle = "#ffff00"
-	ctx.fill();
-	ctx.strokeStyle="#ffff00";
-	ctx.stroke();
+	if(gamestate.pacman.dir == "stop")
+	{
+		drawPacmanShape(ctx, cell_width, cell_height , 0  , 0.001 )
+	}
+	else 
+	{
+		drawPacmanShape(ctx, cell_width, cell_height , gameconfig.mouth_angle[gamestate.pacman.dir], gamestate.pacman.mouth_pos )
+	}
 }
 
-function drawPacman2(ctx, cell_width, cell_height)
+function drawPacmanShape(ctx, cell_width, cell_height , alpha , beta)
 {
+	var x = gamestate.pacman.x*cell_width + cell_width / 2;
+	var y = gamestate.pacman.y*cell_height  + cell_height / 2;
+	
 	ctx.beginPath();
-	 ctx.arc(gamestate.pacman.x*cell_width + cell_width / 2, gamestate.pacman.y*cell_height  + cell_height / 2, cell_width / 3, 0, 0.25 * Math.PI, 1.25 * Math.PI ,false);
+	ctx.moveTo(x,y);
+	ctx.arc(x, y, cell_width / 3,alpha+beta, alpha-beta ,false);
+	ctx.lineTo(x,y);
 	ctx.fillStyle = "#ffff00";
 	ctx.fill();
-	ctx.beginPath();
-	ctx.arc(gamestate.pacman.x*cell_width + cell_width / 2, gamestate.pacman.y*cell_height  + cell_height / 2, cell_width / 3, 0, 0.75 * Math.PI, 1.75 * Math.PI  ,false);
-	ctx.fill();
-	ctx.beginPath();
+	ctx.strokeStyle="#ffff00";
+	ctx.stroke(0);
 }
-
 
