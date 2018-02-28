@@ -194,6 +194,6 @@ function drawPacmanShape(ctx, cell_width, cell_height , alpha , beta)
 	ctx.fillStyle = "#ffff00";
 	ctx.fill();
 	ctx.strokeStyle="#ffff00";
-	ctx.stroke(0);
+	ctx.stroke();
 }
 
