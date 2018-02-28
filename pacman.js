@@ -13,7 +13,7 @@ gamestate =
 		"XXXXXX.XXXXX.XX.XXXXX.XXXXXX",
 		"XXXXXX.XX..........XX.XXXXXX",
 		"XXXXXX.XX.XXX  XXX.XX.XXXXXX",
-		"X     ....X      X....     X",
+		"X1    ....X      X....    2X",
 		"XXXXXX.XX.XXXXXXXX.XX.XXXXXX",
 		"XXXXXX.XX..........XX.XXXXXX",
 		"XXXXXX.XX.XXXXXXXX.XX.XXXXXX",
@@ -33,7 +33,7 @@ gamestate =
 gameconfig = 
 {
 	"mouth_angle": {"up": Math.PI + Math.PI / 2, "left": Math.PI, "down": Math.PI / 2, "right" : 0 },
-	"openmax" : 0.5
+	"openmax" : 1.2
 };
 
 function onLoad()
@@ -113,13 +113,22 @@ function updatePacman()
 		gamestate.map[row] = gamestate.map[row].substr(0,col) + ' ' + gamestate.map[row].substr(col+1);	
 	}
 	
-	if(gamestate.pacman.opendir == "opening" && gamestate.pacman.mouth_pos < gameconfig.openmax)gamestate.pacman.mouth_pos += 0.03;
-	else if(gamestate.pacman.mouth_pos > 0.03)
+	if(gamestate.pacman.opendir == "opening" && gamestate.pacman.mouth_pos < gameconfig.openmax)gamestate.pacman.mouth_pos += 0.1;
+	else if(gamestate.pacman.mouth_pos > 0.1)
 	{	
-		gamestate.pacman.mouth_pos -= 0.03;
+		gamestate.pacman.mouth_pos -= 0.1;
 		gamestate.pacman.opendir = "closing";
 	}
 	else gamestate.pacman.opendir = "opening";
+	
+	if(gamestate.map[row][col] == "1")
+	{
+		gamestate.pacman.x = 25;
+	}
+	if(gamestate.map[row][col] == "2")
+	{
+		gamestate.pacman.x = 2;
+	}
 }
 
 function updateGhosts()
@@ -194,4 +203,3 @@ function drawPacmanShape(ctx, cell_width, cell_height , alpha , beta)
 	ctx.strokeStyle="#ffff00";
 	ctx.stroke();
 }
-
