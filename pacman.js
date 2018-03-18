@@ -14,7 +14,7 @@ gamestate =
 		"XXXXXX.XX..........XX.XXXXXX",
 		"XXXXXX.XX.XXX  XXX.XX.XXXXXX",
 		"X1    ....X      X....    2X",
-		"XXXXXX.XX.XXXXXXXX.XX.XXXXXX",
+		"XXXXXX.XX.XXX  XXX.XX.XXXXXX",
 		"XXXXXX.XX..........XX.XXXXXX",
 		"XXXXXX.XX.XXXXXXXX.XX.XXXXXX",
 		"X............XX............X",
@@ -27,7 +27,14 @@ gamestate =
 		"XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     ],
 	"keys": {"W_pressed": false, "S_pressed":false,"A_pressed":false,"D_pressed":false},
-	"pacman": {"x": 13, "y": 17, "dir": "stop" , "opendir" : "opening", "mouth_pos" : 0.01}
+	"pacman": {"x": 13, "y": 17, "dir": "stop" , "opendir" : "opening", "mouth_pos" : 0.01},
+	//"ghosts":{"x": 11,"y": 11, "dir": "stopped"},
+	
+	"ghosts2":	
+	[{"x": 11,"y": 11, "dir": "stopped"},
+	 {"x": 12,"y": 11, "dir": "stopped"},
+	 {"x": 14,"y": 11, "dir": "stopped"},
+	 {"x": 15,"y": 11, "dir": "stopped"}]
 };
 
 gameconfig = 
@@ -36,12 +43,21 @@ gameconfig =
 	"openmax" : 1.2
 };
 
+dirhelper = 
+{
+	"up": [0,-1],
+	"down": [0,1],
+	"left": [1,0],
+	"right": [-1,0],
+	"stopped": [0,0]
+};
+
 function onLoad()
 {
 	window.setInterval(onTick, 15);
 	document.onkeydown = onKeyDown;
 	document.onkeyup = onKeyUp;
-	score = 0;	
+	score = 0;
 }
 
 function onKeyDown(event) 
@@ -67,18 +83,19 @@ function onKeyUp(event)
 function onTick()
 {	
 	updatePacman();
-	updateGhosts();
-	draw();	
+	updateGhosts2();
+
+	draw();
 	//console.log( gamestate.keys );
 }
 
 function updatePacman()
 {
-	var speed = 0.1;
+	var speed = 0.125;
 	row = Math.round(gamestate.pacman.y)
 	col = Math.round(gamestate.pacman.x)
-	isColAlighned = (Math.abs(gamestate.pacman.x - col) < 0.001);
-	isRowAlighned = (Math.abs(gamestate.pacman.y - row) < 0.001);
+	isColAlighned = (Math.abs(gamestate.pacman.x - col) < 0.05);
+	isRowAlighned = (Math.abs(gamestate.pacman.y - row) < 0.05);
 	
 	if( isColAlighned )
 	{
@@ -131,8 +148,40 @@ function updatePacman()
 	}
 }
 
-function updateGhosts()
-{
+function updateGhosts2()
+{	
+	var speed = 0.1;
+	//var speed = 0.125;	
+	for(var i = 0;i < gamestate.ghosts2.length; i++)
+	{
+		var row = Math.round(gamestate.ghosts2[i].y)
+		var col = Math.round(gamestate.ghosts2[i].x)	
+		var isAlighned = (Math.abs(gamestate.ghosts2[i].x - col) < 0.05) && (Math.abs(gamestate.ghosts2[i].y - row) < 0.05);
+		var rand = Math.random() * 10;
+	
+		if( isAlighned )
+		{
+			var x_ahead = col + dirhelper[gamestate.ghosts2[i].dir][0];
+			var y_ahead = row + dirhelper[gamestate.ghosts2[i].dir][1];
+			if(gamestate.map[y_ahead][x_ahead] == "X")
+				gamestate.ghosts2[i].dir = "stopped";
+			
+			if( rand < 1 )
+				gamestate.ghosts2[i].dir = "stopped";
+		}
+	
+		gamestate.ghosts2[i].x += speed * dirhelper[gamestate.ghosts2[i].dir][0];
+		gamestate.ghosts2[i].y += speed * dirhelper[gamestate.ghosts2[i].dir][1];	
+		
+		if(gamestate.ghosts2[i].dir == "stopped")
+		{
+			if(rand >= 2)gamestate.ghosts2[i].dir = "up";
+			if(rand >= 4)gamestate.ghosts2[i].dir = "down";
+			if(rand >= 6)gamestate.ghosts2[i].dir = "left";
+			if(rand >= 8)gamestate.ghosts2[i].dir = "right";
+			//console.log(gamestate.ghost2[i].dir);
+		}
+	}	
 }
 
 function draw()
@@ -150,10 +199,13 @@ function draw()
 	drawPacman(ctx, cell_width, cell_height);
 			
 	// draw ghosts
+	drawGhosts2(ctx, cell_width, cell_height);
+	
 	if(score == 248)
 	{
+		ctx.fillStyle = "#fff";
 		ctx.font = "90px Arial";
-		ctx.fillText("Victory",10,50);
+		ctx.fillText("Victory",200,320);
 	}
 }
 
@@ -199,7 +251,18 @@ function drawPacmanShape(ctx, cell_width, cell_height , alpha , beta)
 	ctx.arc(x, y, cell_width / 3,alpha+beta, alpha-beta ,false);
 	ctx.lineTo(x,y);
 	ctx.fillStyle = "#ffff00";
-	ctx.fill();
 	ctx.strokeStyle="#ffff00";
 	ctx.stroke();
+	ctx.fill();
+}
+
+function drawGhosts2(ctx, cell_width, cell_height)
+{
+	for(var i = 0; i < gamestate.ghosts2.length; i++)
+	{	
+		var x = gamestate.ghosts2[i].x*cell_width;
+		var y = gamestate.ghosts2[i].y*cell_height;
+		ctx.fillStyle = "#7799ff"
+		ctx.fillRect( x, y , cell_width, cell_height);
+	}
 }
