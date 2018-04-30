@@ -34,7 +34,9 @@ gamestate =
 	[{"x": 11,"y": 11, "dir": "stopped"},
 	 {"x": 12,"y": 11, "dir": "stopped"},
 	 {"x": 14,"y": 11, "dir": "stopped"},
-	 {"x": 15,"y": 11, "dir": "stopped"}]
+	 {"x": 15,"y": 11, "dir": "stopped"}],
+	 
+	 "images": {}
 };
 
 gameconfig = 
@@ -58,6 +60,14 @@ function onLoad()
 	document.onkeydown = onKeyDown;
 	document.onkeyup = onKeyUp;
 	score = 0;
+	gamestate.ticknum = 0;
+	gamestate.pacman.lives = 3;
+	gamestate.levelnum= 1;
+	
+	gamestate.images.img1 = new Image();
+	gamestate.images.img1.src="ghost.png";
+	gamestate.images.img2 = new Image();
+	gamestate.images.img2.src="ghost2.png";
 }
 
 function onKeyDown(event) 
@@ -82,11 +92,29 @@ function onKeyUp(event)
 
 function onTick()
 {	
+	gamestate.ticknum++;
 	updatePacman();
 	updateGhosts2();
+	checkColision();
 
 	draw();
 	//console.log( gamestate.keys );
+}
+
+function checkColision()
+{
+	for(var i = 0; i < gamestate.ghosts2.length; i++)
+	{ 
+		var ghost_row = Math.round(gamestate.ghosts2[i].y);
+		var ghost_col = Math.round(gamestate.ghosts2[i].x);
+		
+		if(ghost_col == col && ghost_row == row)
+		{
+			gamestate.pacman.x = 13;
+			gamestate.pacman.y = 17;
+			gamestate.pacman.lives = gamestate.pacman.lives-1;
+		}
+	}
 }
 
 function updatePacman()
@@ -181,7 +209,14 @@ function updateGhosts2()
 			if(rand >= 8)gamestate.ghosts2[i].dir = "right";
 			//console.log(gamestate.ghost2[i].dir);
 		}
-	}	
+	}
+
+	/*if((gamestate.pacman.x && gamestate.pacman.y) == (gamestate.ghosts2[i]).x && gamestate.ghosts2[i].y))
+	{
+		gamestate.pacman.x = 13;
+		gamestate.pacman.y = 17;
+	}*/
+	
 }
 
 function draw()
@@ -203,9 +238,14 @@ function draw()
 	
 	if(score == 248)
 	{
+		
+	}
+	if(gamestate.pacman.lives == 0)
+	{
 		ctx.fillStyle = "#fff";
 		ctx.font = "90px Arial";
-		ctx.fillText("Victory",200,320);
+		ctx.fillText("Game Over",100,320);
+		
 	}
 }
 
@@ -231,6 +271,7 @@ function drawMap(ctx, cell_width, cell_height)
 
 function drawPacman(ctx, cell_width, cell_height)
 {
+	if(gamestate.pacman.lives > 0 ){ 
 	if(gamestate.pacman.dir == "stop")
 	{
 		drawPacmanShape(ctx, cell_width, cell_height , 0  , 0.001 )
@@ -238,6 +279,7 @@ function drawPacman(ctx, cell_width, cell_height)
 	else 
 	{
 		drawPacmanShape(ctx, cell_width, cell_height , gameconfig.mouth_angle[gamestate.pacman.dir], gamestate.pacman.mouth_pos )
+	}
 	}
 }
 
@@ -254,15 +296,40 @@ function drawPacmanShape(ctx, cell_width, cell_height , alpha , beta)
 	ctx.strokeStyle="#ffff00";
 	ctx.stroke();
 	ctx.fill();
+	ctx.closePath();
 }
 
 function drawGhosts2(ctx, cell_width, cell_height)
 {
-	for(var i = 0; i < gamestate.ghosts2.length; i++)
+	/*for(var i = 0; i < gamestate.ghosts2.length; i++)
 	{	
 		var x = gamestate.ghosts2[i].x*cell_width;
 		var y = gamestate.ghosts2[i].y*cell_height;
-		ctx.fillStyle = "#7799ff"
-		ctx.fillRect( x, y , cell_width, cell_height);
+		ctx.beginPath();
+		ctx.fillStyle = "#ffc038";
+		ctx.strokeStyle="#ffc038";
+		ctx.arc(x + cell_width / 2, y + cell_height / 2 + cell_height / 16, cell_width / 3, Math.PI , 0 ,false);
+		ctx.lineTo(x + cell_width - cell_width / 5,y + cell_height / 2 + cell_height / 4 + cell_height / 8);
+		//ctx.lineTo(x + cell_width / 5,y + cell_height / 2 + cell_height / 4 + cell_height / 8);
+		ctx.lineTo(x + cell_width / 6 * 3,y + cell_height / 2 + cell_height / 4);
+		ctx.lineTo(x + cell_width / 6,y + cell_height / 2 + cell_height / 4);
+		//ctx.lineTo(x + cell_width - cell_width / 6 * 2,y + cell_height / 2 + cell_height / 4);ctx.closePath();
+		ctx.stroke();
+		ctx.fill();
+		ctx.closePath();
+	}*/
+	
+	for(var i = 0; i < gamestate.ghosts2.length; i++)
+	{
+		var x = gamestate.ghosts2[i].x*cell_width;
+	    var y = gamestate.ghosts2[i].y*cell_height;
+		if((gamestate.ticknum / 3) % 2 == 0)
+		{
+			ctx.drawImage(gamestate.images.img1,x,y,cell_width,cell_height);
+		}
+		else
+		{
+			ctx.drawImage(gamestate.images.img2,x,y,cell_width,cell_height);
+		}
 	}
 }
