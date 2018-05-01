@@ -12,14 +12,14 @@ gamestate =
 		"XXXXXX.XXXXX.XX.XXXXX.XXXXXX",
 		"XXXXXX.XXXXX.XX.XXXXX.XXXXXX",
 		"XXXXXX.XX..........XX.XXXXXX",
-		"XXXXXX.XX.XXX  XXX.XX.XXXXXX",
-		"X1    ....X      X....    2X",
-		"XXXXXX.XX.XXX  XXX.XX.XXXXXX",
+		"XXXXXX.XX.XXX--XXX.XX.XXXXXX",
+		"X1----....X------X....----2X",
+		"XXXXXX.XX.XXX--XXX.XX.XXXXXX",
 		"XXXXXX.XX..........XX.XXXXXX",
 		"XXXXXX.XX.XXXXXXXX.XX.XXXXXX",
 		"X............XX............X",
 		"X.XXXX.XXXXX.XX.XXXXX.XXXX.X",
-		"X...XX................XX...X",
+		"X...XX.......-........XX...X",
 		"XXX.XX.XX.XXXXXXXX.XX.XX.XXX",
 		"X......XX....XX....XX......X",
 		"X.XXXXXXXXXX.XX.XXXXXXXXXX.X",
@@ -28,7 +28,6 @@ gamestate =
     ],
 	"keys": {"W_pressed": false, "S_pressed":false,"A_pressed":false,"D_pressed":false},
 	"pacman": {"x": 13, "y": 17, "dir": "stop" , "opendir" : "opening", "mouth_pos" : 0.01},
-	//"ghosts":{"x": 11,"y": 11, "dir": "stopped"},
 	
 	"ghosts2":	
 	[{"x": 11,"y": 11, "dir": "stopped"},
@@ -59,7 +58,8 @@ function onLoad()
 	window.setInterval(onTick, 15);
 	document.onkeydown = onKeyDown;
 	document.onkeyup = onKeyUp;
-	score = 0;
+	gamestate.allscore = 0;
+	gamestate.levelscore = 0;
 	gamestate.ticknum = 0;
 	gamestate.pacman.lives = 3;
 	gamestate.levelnum= 1;
@@ -96,29 +96,35 @@ function onTick()
 	updatePacman();
 	updateGhosts2();
 	checkColision();
-
+	document.getElementById("score").innerHTML = "SCORE = "+ gamestate.allscore;
 	draw();
 	//console.log( gamestate.keys );
 }
 
 function checkColision()
 {
-	for(var i = 0; i < gamestate.ghosts2.length; i++)
-	{ 
-		var ghost_row = Math.round(gamestate.ghosts2[i].y);
-		var ghost_col = Math.round(gamestate.ghosts2[i].x);
-		
-		if(ghost_col == col && ghost_row == row)
-		{
-			gamestate.pacman.x = 13;
-			gamestate.pacman.y = 17;
-			gamestate.pacman.lives = gamestate.pacman.lives-1;
+	if(gamestate.pacman.lives > 0){
+		for(var i = 0; i < gamestate.ghosts2.length; i++)
+		{ 
+			var ghost_row = Math.round(gamestate.ghosts2[i].y);
+			var ghost_col = Math.round(gamestate.ghosts2[i].x);
+			
+			if(ghost_col == col && ghost_row == row)
+			{
+				gamestate.pacman.x = 13;
+				gamestate.pacman.y = 17;
+				gamestate.pacman.lives = gamestate.pacman.lives-1;
+				document.getElementById("lives").innerHTML = "LIVES = "+gamestate.pacman.lives;
+			}
 		}
 	}
 }
 
 function updatePacman()
 {
+	if(gamestate.pacman.lives <=0 )
+		return;
+	
 	var speed = 0.125;
 	row = Math.round(gamestate.pacman.y)
 	col = Math.round(gamestate.pacman.x)
@@ -153,8 +159,9 @@ function updatePacman()
 
 	if(gamestate.map[row][col] == '.')
 	{
-		score += 1;
-		console.log(score);
+		gamestate.levelscore += 10;
+		gamestate.allscore += 10 ;
+		console.log(gamestate.allscore);
 		gamestate.map[row] = gamestate.map[row].substr(0,col) + ' ' + gamestate.map[row].substr(col+1);	
 	}
 	
@@ -210,13 +217,6 @@ function updateGhosts2()
 			//console.log(gamestate.ghost2[i].dir);
 		}
 	}
-
-	/*if((gamestate.pacman.x && gamestate.pacman.y) == (gamestate.ghosts2[i]).x && gamestate.ghosts2[i].y))
-	{
-		gamestate.pacman.x = 13;
-		gamestate.pacman.y = 17;
-	}*/
-	
 }
 
 function draw()
@@ -236,16 +236,24 @@ function draw()
 	// draw ghosts
 	drawGhosts2(ctx, cell_width, cell_height);
 	
-	if(score == 248)
+	if(gamestate.levelscore == 2470)
 	{
-		
+		gamestate.levelnum++;
+		document.getElementById("level").innerHTML = "LEVEL"+gamestate.levelnum;
+		gamestate.levelscore = 0;
+		reinitMap();
+		if(gamestate.pacman.lives < 3)
+		{
+			gamestate.pacman.lives = gamestate.pacman.lives + 2;
+		}
+		else
+		gamestate.pacman.lives++;
 	}
-	if(gamestate.pacman.lives == 0)
+	if(gamestate.pacman.lives <= 0)
 	{
 		ctx.fillStyle = "#fff";
 		ctx.font = "90px Arial";
 		ctx.fillText("Game Over",100,320);
-		
 	}
 }
 
@@ -267,6 +275,41 @@ function drawMap(ctx, cell_width, cell_height)
 			}
 		}
 	}
+}
+
+function reinitMap(ctx, cell_width, cell_height)
+{
+	/*for(i = 0; i < gamestate.map[28]; i++)
+	{
+		for(l = 0; l < gamestate.map[23]; l++)
+		{
+			if(gamestate.map[i][l] == ' ') // dot
+			{
+				gamestate.map[2][2] = '.';
+			}
+		}
+	}*/
+	
+	for(i = 0 ; i < gamestate.map.length; i++)
+	{
+		for(l = 0; l < gamestate.map[i].length; l++)
+		{
+			if(gamestate.map[i][l] == ' ')
+			{				
+				gamestate.map[i] = gamestate.map[i].substr(0,l) + '.' + gamestate.map[i].substr(l+1);	
+			}
+		}
+	}
+	
+	for(k = 0; k < gamestate.ghosts2.length; k++)
+	{	
+		gamestate.ghosts2[k].x = 10 + k;
+		gamestate.ghosts2[k].y = 11;
+	}
+	
+	gamestate.pacman.x = 12;
+	gamestate.pacman.y = 11;
+	
 }
 
 function drawPacman(ctx, cell_width, cell_height)
@@ -301,24 +344,6 @@ function drawPacmanShape(ctx, cell_width, cell_height , alpha , beta)
 
 function drawGhosts2(ctx, cell_width, cell_height)
 {
-	/*for(var i = 0; i < gamestate.ghosts2.length; i++)
-	{	
-		var x = gamestate.ghosts2[i].x*cell_width;
-		var y = gamestate.ghosts2[i].y*cell_height;
-		ctx.beginPath();
-		ctx.fillStyle = "#ffc038";
-		ctx.strokeStyle="#ffc038";
-		ctx.arc(x + cell_width / 2, y + cell_height / 2 + cell_height / 16, cell_width / 3, Math.PI , 0 ,false);
-		ctx.lineTo(x + cell_width - cell_width / 5,y + cell_height / 2 + cell_height / 4 + cell_height / 8);
-		//ctx.lineTo(x + cell_width / 5,y + cell_height / 2 + cell_height / 4 + cell_height / 8);
-		ctx.lineTo(x + cell_width / 6 * 3,y + cell_height / 2 + cell_height / 4);
-		ctx.lineTo(x + cell_width / 6,y + cell_height / 2 + cell_height / 4);
-		//ctx.lineTo(x + cell_width - cell_width / 6 * 2,y + cell_height / 2 + cell_height / 4);ctx.closePath();
-		ctx.stroke();
-		ctx.fill();
-		ctx.closePath();
-	}*/
-	
 	for(var i = 0; i < gamestate.ghosts2.length; i++)
 	{
 		var x = gamestate.ghosts2[i].x*cell_width;
